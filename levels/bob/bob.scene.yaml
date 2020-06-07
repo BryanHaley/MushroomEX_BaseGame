@@ -1,0 +1,33 @@
+---
+scene:
+  short_name: "bob"
+  full_name: "Bob-omb Battlefield"
+
+  objects:
+    level_geo:
+      type: 0 # 0 = level geometry, 1 = level collision, 2 = game object
+      file: "mush/levels/bob/models/bob.obj"
+      pos: [0,0,0]
+      rot: [0,0,0]
+    # end level_geo
+    level_collision:
+      type: 1 # material data discarded
+      file: "mush/levels/bob/models/bob.obj"
+      pos: [0,0,0]
+      rot: [0,0,0]
+    # end level_geo
+  # end objects
+
+  materials: # shared materials for level geo models
+    level_tex:                                
+      shader:                                   
+        vertex:   "mush/shaders/default_mesh.vert"
+        frag:     "mush/shaders/default_mesh.frag"
+        geometry: null                          
+      textures:                                 
+        - "mush/levels/bob/models/level_tex_diffuse.png" # GL_TEXTURE0
+      color:      [1,1,1,1]                     
+      blending:   0 # 0 = CB_DISCARD, 1 = CB_ADD, 2 = CB_MULT, 3 = CB_ALPHA, 4 = CB_COLOR_ONLY
+    # end level_tex
+  # end materials
+# end level

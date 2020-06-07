@@ -1,0 +1,82 @@
+---                                                      # Reference implementation of an mdl.yaml file. Ideally these yaml files should be auto-generated using tools.
+model:                                                   # Models are defined as a name entry and three dictionaries, "bodies", "material_map", and "animations".
+  name: playermodel
+
+  bodies:                                                # A body is a mesh (or multiple meshes) loaded from a file and parented to a bone on the skeleton. Each model holds up to 32 bodies.
+    - studio:                                            # Studio is the default body and must be present. As the default body, the model file used by studio should contain the armature skeleton if applicable.
+      enabled:  true                                     # Represents if the body is "active" i.e. rendered when the model is rendered.
+      bone:     root                                     # Bone to parent the body to. Note that this does not change the body's transform; this is used only for animations. Studio must be parented to root.
+      file:     mush/models/mario.fbx                    # Source file to load the meshes and materials from. Note that materials are added to a total list of materials used by the model, and so must be uniquely named. Be mindful of this if generating an mdl.yaml from multiple model files.
+      rotation: [0,0,0]                                  # xyz euler rotation around model's axes.
+      position: [0,0,0]                                  # xyz position translation from model's origin
+    # end studio
+
+    - luigi_skin:                                        # Example use-case of bodies: alternate "skins" for a character. In this case, the player could either by Mario or Luigi determined by which body is active. Note that body names must be unique.
+      enabled:  false                
+      bone:     root                 
+      file:     mush/models/luigi.fbx
+      rotation: [0,0,0]              
+      position: [0,0,0]              
+    # end luigi_skin
+
+    - cool_hat:                                          # Another example use-case of bodies: attachments, e.g. a hat.
+      enabled:  false                                    # Whether the hat is equipped or not can be changed by default in mdl.yaml file, and changed during runtime by a script.
+      bone:     head                                     # Parent the hat to the head bone. Note that parenting a mesh to a bone does not move the mesh from the model's origin. That can be done below. A bone never changes a mesh's transform, but can move its vertices during animations.
+      file:     mush/models/cool_hat.fbx                    
+      rotation: [0,180,0]                                # Rotate the hat mesh 180 degrees around the model's y axis. Note that rotation is always applied before translation.
+      position: [0,140,0]                                # Translate the hat mesh 140 units up the model's y-axis.
+    # end cool_hat
+  # end bodies
+
+  material_map:                                          # Array of all materials used by all meshes. Material names must be unique. Models MUST have at least one material, even if it has no textures. The materials used by a mesh cannot be changed at runtime.
+    - mat_mario:                                         # Material name is the key. Material names in the mdl.yaml file must match up with the material name expected by a mesh, as a model file may contain multiple meshes using different materials. In a tool, the material names should be derived from the model files and mutable to avoid confusion.
+      shader:                                            # Shader contains a dictionary of {type:"filename"} entries that point to a vertex shader, a fragment shader, and optionally a geometry shader. This shader will be used when the material is active, i.e. some mesh is using the material.
+        vertex:   mush/shaders/default_mesh.vert         # Required vertex shader
+        frag:     mush/shaders/default_mesh.frag         # Required frag shader
+        geometry: null                                   # Optional gometry shader
+      textures:                                          # Array of strings leading to texture filenames. Order is important as it will correspond to the offset from GL_TEXTURE0. Set to null if only using material colors.
+        - mush/models/mario/diffuse.png                  # This texture would correspond to GL_TEXTURE0 when the material is being used
+        - mush/models/mario/specular.png                 # This texture would correspond to GL_TEXTURE0+1
+      color:      [1,1,1,1]                              # 4 channel color (RGBA) of the material, 0 to 1 in each channel
+      blending:   0                                      # Valid blending modes: 0 = CB_DISCARD Discard material colors, 1 = CB_ADD Add/average material colors to texels, 2 = CB_MULT Multiply material colors with texels, 3 = CB_ALPHA override the texture's alpha channel with the material color's alpha channel, 4 = CB_COLOR_ONLY use only the material color and discard texels.
+    # end mat_mario
+
+    - mat_luigi:
+      shader:
+        vertex:   mush/shaders/default_mesh.vert
+        frag:     mush/shaders/default_mesh.frag
+        geometry: null                          
+      textures:                                          
+        - mush/models/luigi/diffuse.png                  
+        - mush/models/luigi/specular.png                 
+      color:      [1,1,1,1]                     
+      blending:   0
+
+    # end mat_luigi
+    - hat:
+      shader:
+        vertex:   mush/shaders/default_mesh.vert
+        frag:     mush/shaders/default_mesh.frag
+        geometry: null                          
+      textures:   null                                   # Note that textures can legally be null, but if it is, CB_COLOR_ONLY is the only valid blending mode. Should throw a warning if they don't match up.
+      color:      [1,0,0,1]                              # Red hat. Colors can be changed at runtime by scripts, so if the luigi skin was selected, maybe this would be changed to green by a script.
+      blending:   4                                      # CB_COLOR_ONLY
+    #end hat
+  # end material_map
+
+  animations:                                            # Each animation is loaded from a separate file. Each file should contain only one animation; the others will be discarded. The files passed to the model bodies should not be animated, but rather have the model in its natural state (i.e. T-posing or A-posing for humanoid characters). The body model files SHOULD have their skeleton and weightmaps if applicable, however. Note that if a body model has weightmapping, it should always be parented to root in the yaml, otherwise the weightmapping will be discarded.
+    - idle:                                              # Animation name. When a model is told to play an animation by a script, it will accept either an index or a string name, so order may be important. Ideally though, scripts should find animations by name during startup then cache the indices, rather than relying on the animation ordering to always stay the same.
+      file: mush/models/mario/anims/idle.fbx             # Model file containing an animated skeleton. Any mesh or material data is discarded. Note that the animated skeleton may legally contain more bones than the studio skeleton, and/or be a different size than the studio skeleton. The only requirement is that the studio skeleton's heirarchy of bones must be a subset of the animation file's heirachy of bones, OR vice versa. This allows you to take animations for characters with, say, a tail, and a apply it to a character with the same skeleton sans a tail. However, you could not apply an animation with a skeleton containing three spine bones between root and the head bone and apply it to a character with two spine bones between the root and the head bone. This is not supported, and will result in undefined behavior. The heirarchy must be preserved.
+      speed: 24                                          # Playback speed in frames per second.
+      length: 48                                         # Length in number of frames.
+      loop: true                                         # Determines if the animation should automatically loop.
+    # end idle
+
+    - sit:
+      file: mush/models/mario/anims/sit.fbx
+      speed: 60
+      length: 180
+      loop: false
+    # end sit
+  # end animations
+# end model

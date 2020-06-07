@@ -1,0 +1,38 @@
+---                                                      # Reference implementation of an mdl.yaml file. Ideally these yaml files should be auto-generated using tools.
+model:                                                   # Models are defined as three dictionaries, "bodies", "material_map", and "animations".
+  bodies:                                                # A body is an array of mesh collections parented to a bone on the skeleton. Studio is the default body and must be present. The skeleton for the entire model is taken from the first model file in the studio body.
+    - studio:                                            # Studio is the default body and must be present. Each model holds up to 32 bodies. As the default body, studio should contain the armature skeleton if applicable.
+      enabled:  true                                     # Represents if the body is "active" i.e. rendered when the model is rendered.
+      bone:     root                                     # Bone to parent the body to. Note that this does not change the body's transform; this is used only for animations. Studio must be parented to root.
+      file:     mush/models/error.fbx                    # Source file to load the meshes and materials from. Note that materials are added to a total list of materials used by the model, and so must be uniquely named even if in different source files. TODO: maybe have editor prefix material names by filename to make them guarenteed unique?
+      rotation: [0,0,0]                                  # xyz euler rotation around model's axes.
+      position: [0,0,0]                                  # xyz position translation from model's origin
+  material_map:                                          # Array of all materials from all meshes. If two materials from two different meshes have the same name, one will overwrite the other. Models MUST have at least one material.
+    - red:                                               # Material name is the key
+      shader:                                            # Shader contains a dictionary of {type:"filename"} entries that point to a vertex shader, a fragment shader, and optionally a geometry shader. This shader will be used when the material is active, i.e. some mesh is using the material.
+        vertex:   mush/shaders/default_mesh.vert         # Required vertex shader
+        frag:     mush/shaders/default_mesh.frag         # Required frag shader
+        geometry: null                                   # Optional gometry shader
+      textures:                                          # Array of strings leading to texture filenames. Order is important as it will correspond to the offset from GL_TEXTURE0. Set to null if only using material colors.
+        - mush/textures/example_texture.png              # This texture would correspond to GL_TEXTURE0 when the material is being used
+    color:      [1,0,0,1]                                # 4 channel color (RGBA), 0 to 1 in each channel
+    blending:   4                                        # CB_COLOR_ONLY.
+  - dark_red:
+    shader:
+      vertex:   mush/shaders/default_mesh.vert
+      frag:     mush/shaders/default_mesh.frag
+      geometry: null                          
+    textures:   null                          
+    color:      [0.5,0,0,1]                     
+    blending:   4                                        # Valid blending modes: 0 = CB_DISCARD Discard material colors, 1 = CB_ADD Add/average material colors to texels, 2 = CB_MULT Multiply material colors with texels, 3 = CB_ALPHA override the texture's alpha channel with the material color's alpha channel, 4 = CB_COLOR_ONLY use only the material color and discard texels.
+animations:     null                                     # Each animation is loaded from a separate file. The files passed to the model bodies should not be animated, but rather have the model in its natural state (i.e. T-posing or A-posing for humanoid characters). They SHOULD have their skeleton and weightmaps if applicable, however. Note that if a non-studio body model has weightmapping, it should always be parented to root in the yaml, otherwise the weightmapping will be discarded.
+  - idle:                                                # Animation name. When a model is told to play an animation, it will accept either an index or a string name.
+    file: mush/models/mario/anims/idle.fbx               # Model file containing an animated skeleton. Any mesh or material data is discarded. Note that the animated skeleton may legally contain more bones than the studio skeleton, and/or be a different size than the studio skeleton. The only requirement is that the studio skeleton's heirarchy of bones must be a subset of the animation file's heirachy of bones, OR vice versa. This allows you to take animations for characters with, say, a tail, and a apply it to a character with the same skeleton sans a tail. However, you could not apply an animation with a skeleton containing three spine bones between root and the head bone and apply it to a character with two spine bones between the root and the head bone. This is not supported, and will result in undefined behavior. The heirarchy must be preserved.
+    speed: 24                                            # Playback speed in frames per second.
+    length: 48                                           # Length in number of frames.
+    loop: true                                           # Determines if the animation should automatically loop.
+  - sit:
+    file: mush/models/mario/anims/sit.fbx
+    speed: 60
+    length: 180
+    loop: false
