@@ -13,7 +13,7 @@ uniform int       u_ColorBlendMode;
 
 void main()
 {
-    vec4 texel = texture2D(u_DiffuseTex, va_TexCoord);
+    vec4 texel = texture(u_DiffuseTex, va_TexCoord);
     
     // Discard colors
     switch (u_ColorBlendMode)
