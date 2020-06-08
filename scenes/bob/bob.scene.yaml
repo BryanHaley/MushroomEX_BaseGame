@@ -4,17 +4,14 @@ scene:
   full_name: "Bob-omb Battlefield"
 
   objects:
-    level_geo:
-      type: 0 # 0 = level geometry, 1 = level collision, 2 = game object
-      file: "base/levels/bob/models/bob.obj"
-      pos: [0,0,0]
-      rot: [0,0,0]
-    # end level_geo
-    level_collision:
-      type: 1 # material data discarded
-      file: "base/levels/bob/models/bob.obj"
-      pos: [0,0,0]
-      rot: [0,0,0]
+    - level_geo:
+      name:     "Level geometry"
+      model:    "base/scenes/bob/models/bob.obj"
+      behavior:  null
+      pos:      [0,0,0]
+      rot:      [0,0,0]
+      collType:  2 # 0 = none, 1 = cylinder, 2 = surfaces
+      collFile:  "base/scenes/bob/models/bob.obj"
     # end level_geo
   # end objects
 
@@ -25,7 +22,7 @@ scene:
         frag:     "base/shaders/default_mesh.frag"
         geometry: null                          
       textures:                                 
-        - "base/levels/bob/models/level_tex_diffuse.png" # GL_TEXTURE0
+        - "base/scenes/bob/models/level_tex_diffuse.png" # GL_TEXTURE0
       color:      [1,1,1,1]                     
       blending:   0 # 0 = CB_DISCARD, 1 = CB_ADD, 2 = CB_MULT, 3 = CB_ALPHA, 4 = CB_COLOR_ONLY
     # end level_tex
