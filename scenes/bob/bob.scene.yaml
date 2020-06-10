@@ -7,21 +7,14 @@ scene:
     - level_geo:
       name:      "Level geometry"
       model:     "base/scenes/bob/models/bob.obj"
-      behavior:  "__STATIC_GEO__" # Special behavior for static geometry that never changes
+      #behaviour: "__STATIC_GEO__" # Special behavior for static geometry that never changes
+      behaviour: "base/scripts/test.as"
+      behClass:  "Test"
       pos:       [0,0,0] # vec3  (x,y,z)
       rot:       [0,0,0] # euler (yaw, pitch, roll) aka (y,x,z)
       collType:   2 # 0 = none, 1 = cylinder, 2 = surfaces
       collFile:   "base/scenes/bob/models/bob.obj"
-    # end level_geo
-    - backpack:
-      name:      "Backpack"
-      model:     "base/models/backpack/backpack.obj"
-      behavior:  "__STATIC_GEO__"
-      pos:       [0,0,0]
-      rot:       [0,0,0]
-      collType:   1
-      collRad:    3
-      collHeight: 10
+      active: true
     # end level_geo
   # end objects
 
